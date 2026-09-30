@@ -98,22 +98,7 @@ COMMAND_LIBRARY = [
      "description": "One-shot snapshot of process activity, sorted by CPU (Linux)."},
     {"name": "top (snapshot)", "command": "top -b -n 1", "category": "Processes", "os": "unix",
      "description": "One-shot snapshot of process activity, sorted by CPU (Linux)."},
-    {
-    "name": "curl wttr.in",
-    "command": "curl \"wttr.in\"",
-    "category": "Processes",
-    "os": "windows",
-    "description": "A text based weather report including ASCII style displays."
-    },
-    {
-    "name": "curl wttr.in/moon",
-    "command": "curl \"wttr.in/moon\"",
-    "category": "Processes",
-    "os": "windows",
-    "description": "A text based moon cycle report including ASCII style displays."
-    },
     
-
     # --- Firmware / BIOS ---
     {"name": "BIOS info (CIM)", "command": "powershell -NoProfile -Command \"Get-CimInstance Win32_BIOS | Format-List Manufacturer,SMBIOSBIOSVersion,ReleaseDate\"",
      "category": "Firmware / BIOS", "os": "windows",
@@ -169,6 +154,23 @@ COMMAND_LIBRARY = [
      "description": "Users currently logged in and how (console, SSH, etc.)."},
     {"name": "last logins", "command": "last -n 10", "category": "Security", "os": "unix",
      "description": "The 10 most recent login sessions on this machine."},
+
+    # --- Misc --- 
+    {
+    "name": "curl wttr.in",
+    "command": "curl \"wttr.in\"",
+    "category": "Processes",
+    "os": "windows",
+    "description": "A text based weather report including ASCII style displays."
+    },
+    {
+    "name": "curl wttr.in/moon",
+    "command": "curl \"wttr.in/moon\"",
+    "category": "Processes",
+    "os": "windows",
+    "description": "A text based moon cycle report including ASCII style displays."
+    },
+  
 ]
 
 
