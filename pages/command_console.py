@@ -159,16 +159,22 @@ COMMAND_LIBRARY = [
     {
     "name": "curl wttr.in",
     "command": "curl \"wttr.in\"",
-    "category": "Processes",
-    "os": "windows",
+    "category": "Misc",
+    "os": "all",
     "description": "A text based weather report including ASCII style displays."
     },
     {
     "name": "curl wttr.in/moon",
     "command": "curl \"wttr.in/moon\"",
-    "category": "Processes",
-    "os": "windows",
+    "category": "Misc",
+    "os": "all",
     "description": "A text based moon cycle report including ASCII style displays."
+    },
+    {"name": "global timezomes",
+     "command": r'INSERT COMMAND',
+     "catergory": "Misc",
+     "os": "windows",
+     "description": "An overview of the time in different timezones and the cities in them"
     },
   
 ]
