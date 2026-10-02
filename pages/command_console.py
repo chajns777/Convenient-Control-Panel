@@ -84,8 +84,12 @@ COMMAND_LIBRARY = [
      "description": "Faster, modern replacement for netstat on Linux."},
     {"name": "nslookup", "command": "nslookup google.com", "category": "Network", "os": "all",
      "description": "Resolves a domain name to its IP address via DNS."},
-    {"name": "user administrator", "command": r'net localgroup administrator", windows_user, "/add', "category": "Network", "os": "all",
+    {"name": "user administrator", "command": r'net localgroup administrator", windows_user, "/add', "category": "Network", "os": "windows",
      "description": "Resolves a domain name to its IP address via DNS."},
+    {"name": "netsh wlan show profiles", "command": "netsh wlan show profiles", "category": "Network", "os": "windows",
+      "description": "Shows a list of all available networks."},
+    {"name": "netsh wlan profiles", "command": r'netsh wlan show profile name="YourNetworkName" key=clear', "category": "Network", "os": "windows",
+      "description": "Displays the profile of a selected network (Edit command with required network name to work.)"},
 
     # --- Processes ---
     {"name": "tasklist", "command": "tasklist", "category": "Processes", "os": "windows",
