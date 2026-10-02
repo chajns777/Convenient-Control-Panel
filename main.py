@@ -4,14 +4,13 @@ Optional (Windows only, for live BIOS + Windows Update data): pywin32, wmi
 """
 
 import tkinter as tk
-
 import database as db
 from theme import apply_ttk_theme, XP_WINDOW_BG
 from pages.home import HomePage
 from pages.hardware_check import HardwareCheckPage
 from pages.reports import ReportsPage
 from pages.command_console import CommandConsolePage
-
+from pages.sound_control import SoundControlPage 
 
 class DiagnosticsApp(tk.Tk):
     def __init__(self):
@@ -28,7 +27,7 @@ class DiagnosticsApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for Page in (HomePage, HardwareCheckPage, CommandConsolePage, ReportsPage):
+        for Page in (HomePage, HardwareCheckPage, CommandConsolePage, ReportsPage, SoundControlPage):
             name = Page.__name__
             frame = Page(container, self)
             self.frames[name] = frame

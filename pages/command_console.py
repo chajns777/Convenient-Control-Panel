@@ -172,7 +172,7 @@ COMMAND_LIBRARY = [
     },
     {"name": "global timezomes",
      "command": r'INSERT COMMAND',
-     "catergory": "Misc",
+     "category": "Misc",
      "os": "windows",
      "description": "An overview of the time in different timezones and the cities in them"
     },
