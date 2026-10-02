@@ -1,4 +1,4 @@
-# System Diagnostics Console
+# Tiny Little Control Panel Project
 
 ## Functions
 
