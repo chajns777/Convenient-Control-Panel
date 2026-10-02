@@ -44,11 +44,10 @@
   old `wmic`, which is disabled or removed on recent Windows 11 builds.
 
   **4. Audio Control**
-- A list of every report saved from the Hardware Check page.
-- Selecting one shows a formatted read-only summary of that snapshot.
-- Each report has its own editable **Notes** panel, saved back to the
-  database on demand.
-- Reports can be deleted.
+- A list of every app running on your desktop and a slider to adjust their individual volume levels.
+- There is a setting to only display the apps outputting audio.
+- Planned to have specific ‘focuses’ which allow custom settings to be applied instantly depending on what task your up to, e.g: Gaming could allow the game to be louder and all other apps to be muted or lowered.
+- HEAVILY WORK IN PROGRESS. THIS IS FAR FROM DONE.
 
 
 ## DATA
