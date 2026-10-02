@@ -43,6 +43,14 @@
 - Windows hardware queries use PowerShell `Get-CimInstance` rather than the
   old `wmic`, which is disabled or removed on recent Windows 11 builds.
 
+  **4. Audio Control**
+- A list of every report saved from the Hardware Check page.
+- Selecting one shows a formatted read-only summary of that snapshot.
+- Each report has its own editable **Notes** panel, saved back to the
+  database on demand.
+- Reports can be deleted.
+
+
 ## DATA
 
 - CPU / RAM / disk / network / battery / temperature figures are **real
