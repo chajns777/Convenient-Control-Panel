@@ -84,7 +84,7 @@ COMMAND_LIBRARY = [
      "description": "Faster, modern replacement for netstat on Linux."},
     {"name": "nslookup", "command": "nslookup google.com", "category": "Network", "os": "all",
      "description": "Resolves a domain name to its IP address via DNS."},
-    {"name": "user administrator", "command": "net localgroup administrator", windows_user, "/add", "category": "Network", "os": "all",
+    {"name": "user administrator", "command": r'net localgroup administrator", windows_user, "/add', "category": "Network", "os": "all",
      "description": "Resolves a domain name to its IP address via DNS."},
 
     # --- Processes ---
