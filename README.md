@@ -46,8 +46,26 @@
   **4. Audio Control**
 - A list of every app running on your desktop and a slider to adjust their individual volume levels.
 - There is a setting to only display the apps outputting audio.
-- Planned to have specific ‘focuses’ which allow custom settings to be applied instantly depending on what task your up to, e.g: Gaming could allow the game to be louder and all other apps to be muted or lowered.
-- HEAVILY WORK IN PROGRESS. THIS IS FAR FROM DONE.
+- Specific ‘focuses’ which allow custom settings to be applied instantly depending on what task your up to, e.g: Gaming could allow the game to be louder and all other apps to be muted or lowered.
+- HEAVILY WORK IN PROGRESS.
+- Backends (chosen automatically):
+  * Windows : pycaw + comtypes   (pip install pycaw comtypes)
+              per-app volume/mute, device volume/mute/gain.
+  * Linux   : PulseAudio / PipeWire through the `pactl` command
+              (package: pulseaudio-utils, or pipewire-pulse). No Python deps.
+              per-app volume/mute, device volume/mute/gain, default device.
+  * macOS   : osascript + system_profiler (built in).
+              Device volume / mic gain apply to the DEFAULT device only, and
+              per-app volume is NOT possible on macOS without a virtual audio
+              driver, so the mixer is shown read-only there.
+              Optional: `brew install switchaudio-osx` enables changing the
+              default device from this page.
+
+ Limits:
+  * Windows cannot change the default device through public APIs, so that
+    button is disabled there (use Windows Sound settings).
+  * Linux only has per-app entries for apps that currently own an audio
+    stream; Windows keeps an entry for every app that has opened audio.
 
 
 ## DATA
