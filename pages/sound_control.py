@@ -4,7 +4,7 @@ Having issued with making it work with other OS
 Create a public discussion if your aware of a solution or have ideas for this page
 """
 
-ImportError os
+import os
 import json
 import time
 import psutil
