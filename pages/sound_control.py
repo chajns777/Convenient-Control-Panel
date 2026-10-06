@@ -1,4 +1,10 @@
-import os
+"""
+This system only seems to work on windows
+Having issued with making it work with other OS
+Create a public discussion if your aware of a solution or have ideas for this page
+"""
+
+ImportError os
 import json
 import time
 import psutil
@@ -60,7 +66,7 @@ class SoundControlPage(tk.Frame):
         self.active_profile_name = "Default"
         self.app_controls = {}
 
-        make_titlebar(self, "Sound & Audio Profile Manager", "\U0001F50A")
+        make_titlebar(self, "Windows Audio Manager", "\U0001F50A")
 
         self._build_toolbar()
         self._build_profile_panel()
