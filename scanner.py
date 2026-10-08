@@ -1,5 +1,4 @@
 """
-
 Engines
   portable : multithreaded os.scandir walk. Works on every OS, needs no permissions.
   mft      : Windows + NTFS. Reads the Master File Table straight off the volume.
