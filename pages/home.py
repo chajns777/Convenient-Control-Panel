@@ -29,7 +29,6 @@ class HomePage(tk.Frame):
         self._build_taskbar()
 
     def _init_icons(self):
-        """Create icon frames and store their window IDs."""
         for glyph, label, page_name in NAV_ITEMS:
             f = tk.Frame(self.desktop, bg=ICON_BG, cursor="hand2", highlightbackground="#68707A", highlightthickness=1)
             
@@ -45,7 +44,6 @@ class HomePage(tk.Frame):
             self.icon_windows.append(win_id)
 
     def _on_desktop_resize(self, event=None):
-        """Recalculates positions to center all icons dynamically on window resize."""
         w, h = self.desktop.winfo_width(), self.desktop.winfo_height()
         if w < 2 or h < 2:
             return

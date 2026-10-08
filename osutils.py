@@ -1,9 +1,4 @@
-"""
-osutils.py - OS-specific helpers (no tkinter imports, stdlib only).
-
-Used both by the GUI and by the elevated helper process, so keep it light.
-"""
-
+import importlib
 import os
 import shlex
 import shutil
@@ -21,16 +16,11 @@ TRASH = "Recycle Bin" if IS_WIN else "Trash"
 
 
 class ElevationDenied(Exception):
-    """User dismissed the OS admin prompt (UAC / polkit / macOS password box)."""
+    pass
 
 
 class ElevationUnavailable(Exception):
-    """No way to elevate on this system (e.g. pkexec missing)."""
-
-
-# --------------------------------------------------------------------------
-# Privileges
-# --------------------------------------------------------------------------
+    pass
 def is_admin():
     try:
         if IS_WIN:
@@ -51,11 +41,6 @@ def _wait(proc, on_poll, poll):
 
 
 def run_elevated(script_args, on_poll=None, poll=0.25):
-    """
-    Run `python <script_args...>` with administrator/root rights and wait for it.
-    Returns the exit code. Raises ElevationDenied / ElevationUnavailable.
-    The OS shows its OWN prompt every time; apps cannot bypass or remember that.
-    """
     py = sys.executable
     if IS_WIN:
         return _run_elevated_windows(py, script_args, on_poll, poll)
@@ -106,15 +91,15 @@ def _run_elevated_windows(py, script_args, on_poll, poll):
 
     sei = SHELLEXECUTEINFO()
     sei.cbSize = ctypes.sizeof(sei)
-    sei.fMask = 0x00000040          # SEE_MASK_NOCLOSEPROCESS
-    sei.lpVerb = "runas"            # triggers the UAC prompt
+    sei.fMask = 0x00000040           
+    sei.lpVerb = "runas"           
     sei.lpFile = py
     sei.lpParameters = subprocess.list2cmdline(list(script_args))
-    sei.nShow = 0                   # hidden window
+    sei.nShow = 0                  
     if not shell32.ShellExecuteExW(ctypes.byref(sei)):
         raise ElevationDenied("The administrator prompt was declined.")
     handle = sei.hProcess
-    while k32.WaitForSingleObject(handle, int(poll * 1000)) == 0x102:   # WAIT_TIMEOUT
+    while k32.WaitForSingleObject(handle, int(poll * 1000)) == 0x102:   
         if on_poll:
             on_poll()
     code = wintypes.DWORD(0)
@@ -122,13 +107,9 @@ def _run_elevated_windows(py, script_args, on_poll, poll):
     k32.CloseHandle(handle)
     return code.value
 
-
-# --------------------------------------------------------------------------
-# Open / reveal
-# --------------------------------------------------------------------------
 def open_path(path):
     if IS_WIN:
-        os.startfile(path)  # noqa: S606
+        os.startfile(path)  
     elif IS_MAC:
         subprocess.Popen(["open", path])
     else:
@@ -136,14 +117,13 @@ def open_path(path):
 
 
 def reveal_in_file_manager(path):
-    """Open the file manager with `path` highlighted (folder fallback on Linux)."""
     path = os.path.abspath(path)
     if IS_WIN:
         subprocess.Popen('explorer /select,"%s"' % os.path.normpath(path))
     elif IS_MAC:
         subprocess.Popen(["open", "-R", path])
     else:
-        try:   # Nautilus, Dolphin, Nemo, Thunar, PCManFM... implement this D-Bus interface
+        try:   
             uri = "file://" + urllib.parse.quote(path)
             r = subprocess.run(
                 ["dbus-send", "--session", "--print-reply",
@@ -163,16 +143,17 @@ def open_full_disk_access_settings():
         subprocess.Popen(["open", "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles"])
 
 
-# --------------------------------------------------------------------------
-# Delete
-# --------------------------------------------------------------------------
+
 def move_to_trash(path):
-    from send2trash import send2trash       # pip install Send2Trash
+    try:
+        send2trash = importlib.import_module("send2trash").send2trash
+    except ModuleNotFoundError as exc:
+        raise ImportError("Moving to the trash needs:\n\n    pip install Send2Trash") from exc
     send2trash(os.path.abspath(path))
 
 
 def _rm_error(func, path, *_):
-    os.chmod(path, stat.S_IWRITE)           # read-only files (common on Windows)
+    os.chmod(path, stat.S_IWRITE)         
     func(path)
 
 
@@ -209,7 +190,6 @@ def _n(p):
 
 
 def is_protected(path):
-    """True for drive roots, home folders and core OS locations - never deletable from the app."""
     try:
         p = _n(os.path.realpath(path))
     except OSError:

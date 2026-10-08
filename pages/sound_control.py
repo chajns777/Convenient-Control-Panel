@@ -45,7 +45,6 @@ FILTER_PLAYING = "Currently Playing Only"
 
 
 def norm_app(name):
-    """Normalise an app name so 'Chrome.exe' / 'chrome' / 'Chrome.app' compare equal."""
     n = (name or "").strip().lower()
     for suf in (".exe", ".app"):
         if n.endswith(suf):
@@ -593,7 +592,6 @@ class ProfileEditor(tk.Toplevel):
 
 
 class SoundControlPage(tk.Frame):
-    """Cross-platform audio manager: per-app mixer, custom profiles, device control."""
 
     def __init__(self, parent, controller):
         super().__init__(parent, bg=XP_WINDOW_BG)
@@ -642,7 +640,6 @@ class SoundControlPage(tk.Frame):
         self.msg_lbl.config(text=text, fg=color)
 
     def _run_async(self, work, done=None):
-        """Run backend work off the UI thread; `done(result, err)` runs on the UI thread."""
         def runner():
             self.backend.thread_init()
             try:

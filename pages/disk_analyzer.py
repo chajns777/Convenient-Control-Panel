@@ -42,7 +42,6 @@ class DiskAnalyzerPage(tk.Frame):
         self._build_tabs()
         self._build_notice()
 
-    # ------------------------------------------------------------------ UI
     def _build_toolbar(self):
         bar = tk.Frame(self, bg=XP_WINDOW_BG, bd=1, relief="ridge")
         bar.pack(fill="x", padx=4, pady=(4, 0))
@@ -99,7 +98,6 @@ class DiskAnalyzerPage(tk.Frame):
         self.nb.add(tab_types, text="File Types")
         self.nb.bind("<<NotebookTabChanged>>", lambda e: self._schedule_treemap())
 
-        # --- folder tree
         self.tree = ttk.Treeview(tab_tree, columns=("size", "pct", "files"), show="tree headings")
         for col, text, w, anc in (("#0", "Name", 380, "w"), ("size", "Size", 90, "e"),
                                   ("pct", "% of parent", 150, "w"), ("files", "Files", 90, "e")):
@@ -109,7 +107,6 @@ class DiskAnalyzerPage(tk.Frame):
         self.tree.bind("<<TreeviewOpen>>", self._on_open)
         self._bind_context(self.tree)
 
-        # --- largest files
         self.top_tree = ttk.Treeview(tab_top, columns=("name", "folder", "size"), show="headings")
         for col, text, w in (("name", "File", 260), ("folder", "Folder", 460), ("size", "Size", 100)):
             self.top_tree.heading(col, text=text)
@@ -117,7 +114,6 @@ class DiskAnalyzerPage(tk.Frame):
         self._with_scroll(tab_top, self.top_tree)
         self._bind_context(self.top_tree)
 
-        # --- treemap
         head = tk.Frame(tab_tm, bg=XP_WINDOW_BG)
         head.pack(fill="x", padx=4, pady=3)
         xp_button(head, "\u2B06 Up", self._tm_up).pack(side="left")
@@ -134,7 +130,6 @@ class DiskAnalyzerPage(tk.Frame):
         self.tm_canvas.bind("<Double-Button-1>", self._tm_double)
         self._bind_context(self.tm_canvas, treemap=True)
 
-        # --- file types
         self.types_tree = ttk.Treeview(tab_types, columns=("ext", "files", "size", "pct"), show="headings")
         for col, text, w in (("ext", "Extension", 160), ("files", "Files", 110),
                              ("size", "Total size", 120), ("pct", "% of scanned files", 160)):
@@ -182,9 +177,7 @@ class DiskAnalyzerPage(tk.Frame):
         if d:
             self.path_var.set(d)
 
-    # ------------------------------------------------------------ scanning
     def _plan_engine(self, path, force):
-        """Decide engine, and ask permission before anything needs elevation."""
         if self.engine_var.get() == ENGINE_PORTABLE and not force:
             return "portable", False, []
         if osutils.IS_WIN and scanner.is_ntfs_volume(path):
@@ -235,7 +228,7 @@ class DiskAnalyzerPage(tk.Frame):
             result = scanner.run_scan(path, engine, elevated, self.progress, self.cancel)
             if result:
                 result.notes = pre_notes + result.notes
-        except Exception as exc:       # noqa: BLE001
+        except Exception as exc:       
             err = exc
         try:
             self.after(0, lambda: self._scan_done(result, err, path))
@@ -292,7 +285,6 @@ class DiskAnalyzerPage(tk.Frame):
         if notes:
             self._set_notice(" ".join(notes))
 
-    # ---------------------------------------------------------- populate UI
     def _populate_all(self):
         r = self.result
         self.tm_root = r.root
@@ -363,7 +355,6 @@ class DiskAnalyzerPage(tk.Frame):
             if iid.startswith("n") and self.tree.exists(iid):
                 self.tree.item(iid, values=self._row(node))
 
-    # ---------------------------------------------------------- context menu
     def _show_menu(self, event, node):
         path = node.full_path()
         m = tk.Menu(self, tearoff=0)
@@ -381,7 +372,7 @@ class DiskAnalyzerPage(tk.Frame):
     def _try(self, fn, *args):
         try:
             fn(*args)
-        except Exception as exc:       # noqa: BLE001
+        except Exception as exc:      
             messagebox.showerror("Error", str(exc), parent=self)
 
     def _copy(self, text):
@@ -393,7 +384,6 @@ class DiskAnalyzerPage(tk.Frame):
         self.nb.select(2)
         self._schedule_treemap()
 
-    # ----------------------------------------------------------------- delete
     def _delete(self, node, permanent):
         if self.scanning:
             messagebox.showinfo("Busy", "Wait for the scan to finish first.", parent=self)
@@ -442,7 +432,7 @@ class DiskAnalyzerPage(tk.Frame):
         r = self.result
         old_parent, size, name = node.parent, node.size, node.name
         files = list(scanner.iter_files(node))
-        scanner.remove_node(node)                       # fixes every ancestor's size/count
+        scanner.remove_node(node)                   
         for f in files:
             ent = r.ext_stats.get(scanner.ext_of(f.name))
             if ent:
@@ -468,7 +458,7 @@ class DiskAnalyzerPage(tk.Frame):
             exc = None
             try:
                 fn()
-            except BaseException as e:      # noqa: BLE001
+            except BaseException as e:  
                 exc = e
             try:
                 self.after(0, lambda: done(exc))
@@ -476,7 +466,6 @@ class DiskAnalyzerPage(tk.Frame):
                 pass
         threading.Thread(target=run, daemon=True).start()
 
-    # ---------------------------------------------------------------- treemap
     def _schedule_treemap(self):
         if self._tm_after:
             self.after_cancel(self._tm_after)
@@ -533,7 +522,7 @@ class DiskAnalyzerPage(tk.Frame):
                                        text=node.name[:chars] + ("..." if len(node.name) > chars else ""))
 
     def _tm_node_at(self, x, y):
-        for x1, y1, x2, y2, node in reversed(self.tm_hits):    # last drawn = deepest
+        for x1, y1, x2, y2, node in reversed(self.tm_hits):     
             if x1 <= x <= x2 and y1 <= y <= y2:
                 return node
         return None

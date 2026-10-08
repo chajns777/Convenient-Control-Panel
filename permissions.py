@@ -1,15 +1,3 @@
-"""
-permissions.py - "ask first" gate for features that need extra rights or are destructive.
-
-Each capability can be answered:
-    Allow once   -> yes for this action only
-    Always allow -> remembered in permissions.json (revoke any time from the page)
-    Don't allow  -> no, and nothing is stored (you'll be asked again next time)
-
-Note: "Always allow" only skips THIS app's question. The operating system's own
-admin prompt (UAC / polkit / macOS password box) still appears every time.
-"""
-
 import json
 import os
 import sys
@@ -128,7 +116,6 @@ class PermissionManager:
         return self._data.get(cap) is True
 
     def request(self, parent, cap, detail=""):
-        """Returns True if the action may proceed. Must be called from the Tk thread."""
         if self.is_always(cap):
             return True
         dlg = _PermissionDialog(parent, cap, detail)
@@ -146,7 +133,6 @@ class PermissionManager:
         self._save()
 
     def manage(self, parent):
-        """Small window listing every permission with a Revoke button."""
         win = tk.Toplevel(parent)
         win.title("Permissions")
         win.configure(bg=XP_WINDOW_BG)

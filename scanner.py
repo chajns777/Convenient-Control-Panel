@@ -1,5 +1,4 @@
 """
-scanner.py - cross-platform disk scanner. No GUI imports (same idea as hardware_monitor.py).
 
 Engines
   portable : multithreaded os.scandir walk. Works on every OS, needs no permissions.
@@ -7,8 +6,6 @@ Engines
              Needs administrator rights (raw volume access).
   find     : Linux + GNU find. The directory walk runs in C; Python only parses the output.
              Works without root, but root can read protected folders too.
-
-Every fast engine falls back to the portable scanner if anything goes wrong.
 
 This file doubles as the elevated helper:  python scanner.py --helper <mode> ...
 Run `python scanner.py <folder>` for a quick console test.
@@ -33,10 +30,6 @@ IS_WIN = sys.platform == "win32"
 IS_LINUX = sys.platform.startswith("linux")
 SCRIPT = os.path.abspath(__file__)
 
-
-# ==========================================================================
-# Data model
-# ==========================================================================
 class Node:
     __slots__ = ("name", "parent", "is_dir", "size", "file_count", "children")
 
@@ -60,7 +53,6 @@ class Node:
 
 
 class Progress:
-    """Plain counters the GUI polls from its own thread (approximate while scanning)."""
     def __init__(self):
         self.files = 0
         self.dirs = 0
@@ -94,7 +86,6 @@ def _norm_root(p):
 
 
 def finalize(root):
-    """Aggregate sizes/file counts bottom-up (iterative) and sort children by size."""
     stack = [(root, False)]
     while stack:
         n, done = stack.pop()
@@ -127,7 +118,6 @@ def ext_of(name):
 
 
 def analyze(root, top_n=1000):
-    """One pass: biggest files, per-extension totals, counts."""
     heap, ext, files, dirs, ctr = [], {}, 0, 0, 0
     stack = [root]
     while stack:
@@ -154,7 +144,6 @@ def analyze(root, top_n=1000):
 
 
 def remove_node(node):
-    """Detach a deleted node and fix every ancestor's totals (no rescan needed)."""
     p, size, cnt = node.parent, node.size, node.file_count
     if p is not None:
         try:
@@ -165,7 +154,6 @@ def remove_node(node):
         p.size -= size
         p.file_count -= cnt
         p = p.parent
-    # node.parent is kept so descendants can still walk up to `node` (see is_within)
 
 
 def is_within(n, ancestor):
@@ -176,9 +164,6 @@ def is_within(n, ancestor):
     return False
 
 
-# ==========================================================================
-# Engine 1: portable (multithreaded scandir)
-# ==========================================================================
 def scan_portable(root_path, progress, cancel, workers=None):
     root_path = _norm_root(root_path)
     root = Node(root_path, None, True)
@@ -204,10 +189,10 @@ def scan_portable(root_path, progress, cancel, workers=None):
                         if e.is_dir(follow_symlinks=False):
                             st = e.stat(follow_symlinks=False)
                             if IS_WIN:
-                                if st.st_file_attributes & 0x400:    # junction / reparse point
+                                if st.st_file_attributes & 0x400:    
                                     continue
                             elif st.st_dev != root_dev or e.path in skip_paths:
-                                continue                              # other filesystem / pseudo-fs
+                                continue                              
                             child = Node(e.name, node, True)
                             node.children.append(child)
                             progress.dirs += 1
@@ -219,13 +204,13 @@ def scan_portable(root_path, progress, cancel, workers=None):
                             if IS_WIN:
                                 size = st.st_size
                             else:
-                                if st.st_nlink > 1:                   # count hard links once
+                                if st.st_nlink > 1:              
                                     key = (st.st_dev, st.st_ino)
                                     with seen_lock:
                                         if key in seen:
                                             continue
                                         seen.add(key)
-                                size = st.st_blocks * 512             # size on disk
+                                size = st.st_blocks * 512             
                             node.children.append(Node(e.name, node, False, size))
                             progress.files += 1
                     except OSError:
@@ -261,9 +246,6 @@ def scan_portable(root_path, progress, cancel, workers=None):
     return root
 
 
-# ==========================================================================
-# Helper-process plumbing (for elevated work)
-# ==========================================================================
 def _read_status(out):
     try:
         with open(out + ".status") as fh:
@@ -273,7 +255,6 @@ def _read_status(out):
 
 
 def _run_helper(mode_args, cancel, out, progress=None, label=""):
-    """Run `scanner.py --helper ...` elevated; GUI stays un-elevated. Raises on failure."""
     def poll():
         if cancel.is_set():
             try:
@@ -304,7 +285,6 @@ def elevated_delete(path):
 
 
 class _FileFlag:
-    """cancel.is_set() backed by a file, so the un-elevated GUI can cancel the elevated helper."""
     def __init__(self, path):
         self.path = path
 
@@ -312,9 +292,6 @@ class _FileFlag:
         return os.path.exists(self.path)
 
 
-# ==========================================================================
-# Engine 2: Windows NTFS Master File Table
-# ==========================================================================
 def is_ntfs_volume(path):
     if not IS_WIN:
         return False
@@ -332,17 +309,16 @@ def is_ntfs_volume(path):
 
 
 def _parse_record(rec, rsize):
-    """Parse one 1 KB MFT record -> (base_ref, parent_ref, name, size, is_dir) or None."""
     unpack = struct.unpack_from
     usa_off, usa_cnt = unpack("<HH", rec, 4)
     if usa_cnt < 2 or usa_off + 2 * usa_cnt > rsize:
         return None
-    for i in range(1, usa_cnt):                       # undo the "fixup" sector-end markers
+    for i in range(1, usa_cnt):                    
         e = i * 512
         if e > rsize:
             break
         rec[e - 2:e] = rec[usa_off + 2 * i: usa_off + 2 * i + 2]
-    base = int.from_bytes(rec[0x20:0x26], "little")   # non-zero => extension record
+    base = int.from_bytes(rec[0x20:0x26], "little")  
     is_dir = 1 if rec[0x16] & 2 else 0
     off = rec[0x14] | (rec[0x15] << 8)
     name, parent, best_ns, size = None, 0, 9, None
@@ -350,17 +326,17 @@ def _parse_record(rec, rsize):
         atype, alen = unpack("<II", rec, off)
         if atype == 0xFFFFFFFF or alen < 16 or off + alen > rsize:
             break
-        if atype == 0x30:                             # $FILE_NAME (always resident)
+        if atype == 0x30:                         
             p = off + unpack("<H", rec, off + 0x14)[0]
             nl, ns = rec[p + 0x40], rec[p + 0x41]
-            # prefer Win32/POSIX names over the 8.3 DOS alias (namespace 2)
+
             if name is None or (best_ns == 2 and ns != 2):
                 if p + 0x42 + nl * 2 <= rsize:
                     parent = unpack("<Q", rec, p)[0] & 0xFFFFFFFFFFFF
                     name = bytes(rec[p + 0x42:p + 0x42 + nl * 2]).decode("utf-16-le", "replace")
                     best_ns = ns
-        elif atype == 0x80 and rec[off + 9] == 0:     # unnamed $DATA
-            if rec[off + 8]:                          # non-resident: use allocated size
+        elif atype == 0x80 and rec[off + 9] == 0:     
+            if rec[off + 8]:                        
                 if unpack("<Q", rec, off + 0x10)[0] == 0:
                     size = unpack("<Q", rec, off + 0x28)[0]
             elif size is None:
@@ -384,16 +360,11 @@ def _runs(buf, off, end):
             off += lo
             runs.append((lcn, length))
         else:
-            runs.append((None, length))               # sparse run
+            runs.append((None, length))              
     return runs
 
 
 def read_mft(drive, cancel=None, on_pct=None):
-    """
-    Read every file record from the NTFS $MFT of `drive` ("C:").
-    Returns (names, parents, isdir_bytes, sizes) indexed by MFT record number.
-    Sizes are ALLOCATED sizes (like WizTree's default). Needs admin rights.
-    """
     with open(r"\\.\%s" % drive.rstrip("\\"), "rb", buffering=0) as f:
         boot = f.read(4096)
         if boot[3:11] != b"NTFS    ":
@@ -451,7 +422,7 @@ def read_mft(drive, cancel=None, on_pct=None):
                 take = min(len(buf) // rsize * rsize, remaining)
                 for pos in range(0, take, rsize):
                     rec = buf[pos:pos + rsize]
-                    if rec[:4] == b"FILE" and rec[0x16] & 1:          # in use
+                    if rec[:4] == b"FILE" and rec[0x16] & 1:        
                         r = _parse_record(rec, rsize)
                         if r:
                             base, parent, name, size, d = r
@@ -465,7 +436,7 @@ def read_mft(drive, cancel=None, on_pct=None):
                 remaining -= take
                 if on_pct:
                     on_pct(int(100 * idx / max(total, 1)))
-        for b, s in ext_sizes.items():       # $DATA that lives in an extension record
+        for b, s in ext_sizes.items():  
             if b < total and names[b] is not None and not sizes[b]:
                 sizes[b] = s
         return names, parents, bytes(isdir), sizes
@@ -544,9 +515,6 @@ def scan_mft(path, elevated, progress, cancel):
     return _crop(root, path, drive + "\\")
 
 
-# ==========================================================================
-# Engine 3: Linux GNU find
-# ==========================================================================
 _FIND_OK = None
 
 
@@ -564,7 +532,6 @@ def find_supported():
 
 
 def _find_cmd(path):
-    # type, hardlinks, dev:inode, 512-byte blocks actually used, path relative to start
     return ["find", path, "-xdev", "-printf", r"%y\t%n\t%D:%i\t%b\t%P\0"]
 
 
@@ -641,11 +608,7 @@ def scan_find(path, elevated, progress, cancel):
     return None if cancel.is_set() else root
 
 
-# ==========================================================================
-# Orchestration
-# ==========================================================================
 def run_scan(path, engine, elevated, progress, cancel):
-    """engine: 'portable' | 'mft' | 'find'.  elevated: allowed to start the admin helper."""
     t0, notes, root = time.time(), [], None
     label = "Portable (multithreaded scandir)"
     path = _norm_root(path)
@@ -676,11 +639,7 @@ def run_scan(path, engine, elevated, progress, cancel):
                       progress.skipped, progress.denied, notes)
 
 
-# ==========================================================================
-# Treemap layout (squarified, Bruls et al.)
-# ==========================================================================
 def squarify(sizes, x, y, w, h):
-    """sizes: positive numbers sorted descending. Returns one (x, y, w, h) per size."""
     total = float(sum(sizes))
     if total <= 0 or w <= 0 or h <= 0:
         return []
@@ -698,14 +657,14 @@ def squarify(sizes, x, y, w, h):
             row.append(areas[j])
             j += 1
         rs = sum(row)
-        if w >= h:                       # column on the left
+        if w >= h:                     
             cw, cy = rs / h, y
             for a in row:
                 rects.append((x, cy, cw, a / cw))
                 cy += a / cw
             x += cw
             w -= cw
-        else:                            # row on top
+        else:                      
             rh, cx = rs / w, x
             for a in row:
                 rects.append((cx, y, a / rh, rh))
@@ -716,9 +675,6 @@ def squarify(sizes, x, y, w, h):
     return rects
 
 
-# ==========================================================================
-# Elevated helper entry point + console test
-# ==========================================================================
 def _write_private(path, text):
     with open(path, "w") as fh:
         fh.write(text)
@@ -727,7 +683,7 @@ def _write_private(path, text):
 
 def _chmod_open(path):
     try:
-        os.chmod(path, 0o666)            # root-written files must stay readable/deletable by the user
+        os.chmod(path, 0o666)          
     except OSError:
         pass
 
