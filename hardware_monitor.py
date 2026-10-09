@@ -18,24 +18,24 @@ Honesty note about scope (read this before extending the app):
     as such in the UI - not a vendor diagnostic tool.
 """
 
+import importlib
 import platform
 import socket
 import time
 import psutil
 
 try:
-    import wmi  # Windows only, optional
+    import wmi
     _HAS_WMI = True
 except ImportError:
     _HAS_WMI = False
 
-try:
-    import win32com.client  # pywin32, Windows only, optional
-    _HAS_WIN32COM = True
-except ImportError:
-    _HAS_WIN32COM = False
-
 IS_WINDOWS = platform.system() == "Windows"
+
+try:
+    win32com_client = importlib.import_module("win32com.client") if IS_WINDOWS else None
+except ImportError:
+    win32com_client = None
 
 DISK_WARN_PCT = 85
 RAM_WARN_PCT = 90
@@ -218,11 +218,12 @@ def check_os_updates():
     if not IS_WINDOWS:
         return {"available": None, "count": 0,
                 "message": "OS update checking is implemented for Windows only in this build."}
-    if not _HAS_WIN32COM:
+    if win32com_client is None:
         return {"available": None, "count": 0,
-                "message": "Install 'pywin32' to enable live Windows Update checks."}
+                "message": "Install 'pywin32' (`python -m pip install pywin32`) "
+                           "to enable live Windows Update checks."}
     try:
-        session = win32com.client.Dispatch("Microsoft.Update.Session")
+        session = win32com_client.Dispatch("Microsoft.Update.Session")
         searcher = session.CreateUpdateSearcher()
         result = searcher.Search("IsInstalled=0 and IsHidden=0")
         count = result.Updates.Count

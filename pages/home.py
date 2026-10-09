@@ -5,7 +5,7 @@ from theme import (
     XP_WINDOW_BG, XP_TASKBAR_BG, XP_GREEN_START, FONT_UI, FONT_UI_BOLD, FONT_HEADER, gradient_rect
 )
 
-ICON_BG = "#6E97C4"
+ICON_BG = "#B1B7BD"
 
 NAV_ITEMS = [
     ("\U0001F5A5", "Hardware\nCheck", "HardwareCheckPage"),
@@ -29,9 +29,8 @@ class HomePage(tk.Frame):
         self._build_taskbar()
 
     def _init_icons(self):
-        """Create icon frames and store their window IDs."""
         for glyph, label, page_name in NAV_ITEMS:
-            f = tk.Frame(self.desktop, bg=ICON_BG, cursor="hand2", highlightbackground="#1F3F63", highlightthickness=1)
+            f = tk.Frame(self.desktop, bg=ICON_BG, cursor="hand2", highlightbackground="#68707A", highlightthickness=1)
             
             icon_lbl = tk.Label(f, text=glyph, font=("Segoe UI Emoji", 30), bg=ICON_BG, fg="white")
             icon_lbl.pack(pady=(8, 0))
@@ -45,13 +44,12 @@ class HomePage(tk.Frame):
             self.icon_windows.append(win_id)
 
     def _on_desktop_resize(self, event=None):
-        """Recalculates positions to center all icons dynamically on window resize."""
         w, h = self.desktop.winfo_width(), self.desktop.winfo_height()
         if w < 2 or h < 2:
             return
 
         self.desktop.delete("bg")
-        gradient_rect(self.desktop, 0, 0, w, h, "#3A6EA5", "#A9C8E8", vertical=True)
+        gradient_rect(self.desktop, 0, 0, w, h, "#6A7077", "#D0D5DA", vertical=True)
         self.desktop.create_text(w // 2, 36, text="System Diagnostics Console", font=FONT_HEADER, fill="white", tags="bg")
         self.desktop.create_text(w // 2, 62, text="Windows XP-styled hardware utility", font=FONT_UI, fill="#EAF2FB", tags="bg")
         self.desktop.tag_lower("bg")
@@ -78,10 +76,11 @@ class HomePage(tk.Frame):
         )
         start.pack(side="left", padx=3, pady=2)
 
-        self.clock_lbl = tk.Label(bar, font=FONT_UI, bg="#1941A5", fg="white", padx=8)
+        self.clock_lbl = tk.Label(bar, font=FONT_UI, bg="#585A61", fg="white", padx=8)
         self.clock_lbl.pack(side="right", fill="y", padx=3, pady=3)
         self._tick_clock()
 
     def _tick_clock(self):
         self.clock_lbl.config(text=time.strftime("%I:%M %p"))
         self.after(1000, self._tick_clock)
+        

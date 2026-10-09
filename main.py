@@ -1,5 +1,5 @@
 """
-Requires: psutil, matplotlib  (see requirements.txt)
+Requires: psutil, matplotlib, Send2Trash  (see requirements.txt)
 Optional (Windows only, for live BIOS + Windows Update data): pywin32, wmi
 """
 
@@ -10,7 +10,9 @@ from pages.home import HomePage
 from pages.hardware_check import HardwareCheckPage
 from pages.reports import ReportsPage
 from pages.command_console import CommandConsolePage
-from pages.sound_control import SoundControlPage 
+from pages.sound_control import SoundControlPage
+from pages.disk_analyzer import DiskAnalyzerPage
+
 
 class DiagnosticsApp(tk.Tk):
     def __init__(self):
@@ -27,7 +29,8 @@ class DiagnosticsApp(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for Page in (HomePage, HardwareCheckPage, CommandConsolePage, ReportsPage, SoundControlPage):
+        for Page in (HomePage, HardwareCheckPage, CommandConsolePage, ReportsPage,
+                     SoundControlPage, DiskAnalyzerPage):
             name = Page.__name__
             frame = Page(container, self)
             self.frames[name] = frame
@@ -37,9 +40,10 @@ class DiagnosticsApp(tk.Tk):
         self.show_frame("HomePage")
 
     def _on_close(self):
-        console = self.frames.get("CommandConsolePage")
-        if console:
-            console.shutdown()
+        for name in ("CommandConsolePage", "DiskAnalyzerPage"):
+            page = self.frames.get(name)
+            if page:
+                page.shutdown()
         self.destroy()
 
     def show_frame(self, name):
