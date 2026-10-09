@@ -12,6 +12,7 @@ NAV_ITEMS = [
     ("\U0001F4BB", "Command\nConsole", "CommandConsolePage"),
     ("\U0001F4C1", "Report\nArchive", "ReportsPage"),
     ("\U0001F50A", "Sound\nControl", "SoundControlPage"),
+    ("\U0001F4BD", "Disk Space\nAnalyzer", "DiskAnalyzerPage"),
 ]
 
 class HomePage(tk.Frame):
