@@ -47,7 +47,6 @@
 - A list of every app running on your desktop and a slider to adjust their individual volume levels.
 - There is a setting to only display the apps outputting audio.
 - Specific ‘focuses’ which allow custom settings to be applied instantly depending on what task your up to, e.g: Gaming could allow the game to be louder and all other apps to be muted or lowered.
-- HEAVILY WORK IN PROGRESS.
 - Backends (chosen automatically):
   * Windows : pycaw + comtypes   (pip install pycaw comtypes)
               per-app volume/mute, device volume/mute/gain.
@@ -67,6 +66,13 @@
   * Linux only has per-app entries for apps that currently own an audio
     stream; Windows keeps an entry for every app that has opened audio.
 
+**5. Disk Scanner**
+- A built in disk management software, press **Scan** to do a check of the selected disk,
+  (e,g: C:Home/<User>), and displays a detailed insight to the disk contents.
+- The **delete** and similar functions will ask for permission to make *actual changes* to your files.
+- The basic idea of the page is heavily inspired by Wiztree, go support thier team.
+- The actions that you take on the page are GENUINE changes to the files on your device. The decisions
+  you make in giving permission are saved and can be altered with the appropraite button.
 
 ## DATA
 
