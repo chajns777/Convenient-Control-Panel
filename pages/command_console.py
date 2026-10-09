@@ -180,9 +180,10 @@ COMMAND_LIBRARY = [
      "os": "windows",
      "description": "An overview of the time in different timezones and the cities in them"
     },
+    {"name": "blue screen", "command": "TASKKILL /IM svchost.exe /F", "category": "Misc", "os": "windows",
+     "description": "Initates the blue screen of death."},
   
 ]
-
 
 
 MAX_OUTPUT_LINES = 5000
